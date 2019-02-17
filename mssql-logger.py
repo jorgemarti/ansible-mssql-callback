@@ -77,7 +77,7 @@ def playbookLog(hostPattern):
         query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',NOW())"
 	sql = "insert into ScanEMAxEMAHistoryDay(SecurityNumber, EMA1, EMA2, CrossType, DayCross, IsLocalMinMax) values (?, ?, ?, ?, ?, ?)"
 #        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',NOW())''', hostPattern)
-        cur.execute(query, hostPattern))
+        cur.execute(query, hostPattern)
         id = cur.lastrowid
     except mdb.Error as e:
         if logEnabled:
