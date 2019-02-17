@@ -74,10 +74,12 @@ def playbookLog(hostPattern):
     cur = con.cursor()
     id = -1
     try:
-        query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())"
+#       query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())"
+        query="INSERT INTO playbook_log (host_pattern, running, start) VALUES ('all' ,'1',getdate())"
+
 #        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())''', hostPattern)
-        cur.execute(query, hostPattern)
-        con.commit()
+        cur.execute(query)
+#        cur.execute(query, hostPattern)
         id = cur.lastrowid
     except mdb.Error as e:
         if logEnabled:
