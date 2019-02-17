@@ -143,6 +143,7 @@ def insertOrUpdateHostName(hostName):
             query="SELECT id FROM hosts WHERE host=?"
             cur.execute(query, hostName)
             rows = cur.rowcount
+            logging.critical("Got the following rows: %s" (rows))
         except mdb.Error as e:
             if logEnabled:
                 logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
@@ -433,7 +434,7 @@ class CallbackModule(object):
     def v2_runner_on_ok(self, result):
         host = result._host.get_name()
         self.runner_on_ok(host, result._result)
-        
+
     def runner_on_ok(self, host, res):
         if logEnabled:
             logging.debug("Callback: runner_on_ok(): host=%s" % (host))
