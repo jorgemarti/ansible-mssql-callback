@@ -142,9 +142,6 @@ def insertOrUpdateHostName(hostName):
         try:
             query="SELECT id FROM hosts WHERE host=?"
             cur.execute(query, hostName)
-            con.commit()
-            rows = cur.fetchone()[0]
-            logging.critical("These are the ids gotten: %s" % (rows))
         except mdb.Error as e:
             if logEnabled:
                 logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
@@ -152,6 +149,8 @@ def insertOrUpdateHostName(hostName):
             pass
 
         # check number of results - it might be a new host
+        rows = cur.rowcount
+        logging.critical("These are the rows gotten: %s" % (rows))
         if rows > 0:
             try:
                 hostId = cur.fetchone()[0]
