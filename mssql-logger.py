@@ -106,13 +106,13 @@ def playbookFinished():
         con.close()
 
 
-def taskLog(name):
+def taskLog(task):
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
     cur = con.cursor()
     id = -1
     try:
         query="INSERT INTO task_log (playbook_id, name, start) VALUES (?,?,getdate())"
-        cur.execute(query, (playbookId, name))
+        cur.execute(query, (playbookId, task.name))
     except mdb.Error as e:
         if logEnabled:
             logging.critical("taskLog() - This query failed to execute: %s" % (query))
@@ -500,7 +500,7 @@ class CallbackModule(object):
     def playbook_on_task_start(self, name, is_conditional):
         global taskId
         if logEnabled:
-            logging.debug("Callback: playbook_on_task_start(): task=%s" % (name))
+            logging.debug("Callback: playbook_on_task_start(): task=%s" % (name.name))
         taskId = taskLog(name)
         pass
 
