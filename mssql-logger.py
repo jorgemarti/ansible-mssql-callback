@@ -75,10 +75,6 @@ def playbookLog(hostPattern):
     id = -1
     try:
         query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())"
-#        query="INSERT INTO playbook_log (host_pattern, running, start) VALUES ('all' ,'1',getdate())"
-
-#        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())''', hostPattern)
-#        cur.execute(query)
         cur.execute(query, str(hostPattern))
         
     except mdb.Error as e:
@@ -90,7 +86,6 @@ def playbookLog(hostPattern):
         cur.close()
         con.commit()
         con.close()
-        logging.critical("The recorded playbook id is %s" % (id) )
     return id
 
 
@@ -98,11 +93,13 @@ def playbookFinished():
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
     cur = con.cursor()
     try:
-        cur.execute("UPDATE playbook_log SET end = getdate(), running='0' WHERE id = %s", (playbookId))
+        query="UPDATE playbook_log SET end = getdate(), running='0' WHERE id = ?"
+ #       cur.execute("UPDATE playbook_log SET end = getdate(), running='0' WHERE id = %s", (playbookId))
+        cur.execute(query,playbookId)
     except mdb.Error as e:
         if logEnabled:
-            logging.critical("playbookFinished() - This query failed to execute: %s" % (cur._last_executed))
-            logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+            logging.critical("playbookFinished() - This query failed to execute: %s" % (query))
+            logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
         cur.close()
         con.commit()
