@@ -74,8 +74,8 @@ def playbookLog(hostPattern):
     cur = con.cursor()
     id = -1
     try:
-        query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',NOW())"
-#        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',NOW())''', hostPattern)
+        query="INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())"
+#        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())''', hostPattern)
         cur.execute(query, hostPattern)
         con.commit()
         id = cur.lastrowid
@@ -94,7 +94,7 @@ def playbookFinished():
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
     cur = con.cursor()
     try:
-        cur.execute("UPDATE playbook_log SET end = NOW(), running='0' WHERE id = %s", (playbookId))
+        cur.execute("UPDATE playbook_log SET end = getdate(), running='0' WHERE id = %s", (playbookId))
     except mdb.Error as e:
         if logEnabled:
             logging.critical("playbookFinished() - This query failed to execute: %s" % (cur._last_executed))
@@ -110,7 +110,7 @@ def taskLog(name):
     cur = con.cursor()
     id = -1
     try:
-        cur.execute("INSERT INTO task_log (playbook_id, name, start) VALUES (%s,%s,NOW())", (playbookId, name))
+        cur.execute("INSERT INTO task_log (playbook_id, name, start) VALUES (%s,%s,getdate())", (playbookId, name))
         id = cur.lastrowid
     except mdb.Error as e:
         if logEnabled:
@@ -150,7 +150,7 @@ def insertOrUpdateHostName(hostName):
         if rows > 0:
             try:
                 hostId = cur.fetchone()[0]
-                cur.execute("UPDATE hosts SET last_seen = NOW() WHERE id=%s", (hostId))
+                cur.execute("UPDATE hosts SET last_seen = getdate() WHERE id=%s", (hostId))
             except mdb.Error as e:
                 if logEnabled:
                     logging.critical(
@@ -160,7 +160,7 @@ def insertOrUpdateHostName(hostName):
         else:
             # add a new host to the table
             try:
-                cur.execute("INSERT INTO hosts (host, last_seen) VALUES (%s,NOW())", (hostName))
+                cur.execute("INSERT INTO hosts (host, last_seen) VALUES (%s,getdate())", (hostName))
                 hostId = cur.lastrowid
             except mdb.Error as e:
                 if logEnabled:
@@ -311,7 +311,7 @@ def storeRunnerLog(hostId, delegateHost, module, details, ok):
     cur = con.cursor()
     try:
         cur.execute(
-            "INSERT INTO runner_log (`host_id`, `task_id`, `module`, `changed`, `extra_info`, `ok`, `delegate_host`,`start`) VALUES (%s,%s,%s,%s,%s,%s,%s,NOW())",
+            "INSERT INTO runner_log (`host_id`, `task_id`, `module`, `changed`, `extra_info`, `ok`, `delegate_host`,`start`) VALUES (%s,%s,%s,%s,%s,%s,%s,getdate())",
             (hostId,
              taskId,
              module,
@@ -353,7 +353,7 @@ def storeRunnerLogMissed(hostId, delegateHost, reason, msg):
     cur = con.cursor()
     try:
         cur.execute(
-            "INSERT INTO runner_log (`host_id`, `task_id`, `module`, `changed`, `extra_info`, `ok`, `delegate_host`, `unreachable`, `skipped`, `fail_msg`, `start`) VALUES (%s,%s,NULL,'0',NULL,'1',%s,%s,%s,%s,NOW())",
+            "INSERT INTO runner_log (`host_id`, `task_id`, `module`, `changed`, `extra_info`, `ok`, `delegate_host`, `unreachable`, `skipped`, `fail_msg`, `start`) VALUES (%s,%s,NULL,'0',NULL,'1',%s,%s,%s,%s,getdate())",
             (hostId,
              taskId,
              delegateHost,
