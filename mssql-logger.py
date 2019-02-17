@@ -82,7 +82,7 @@ def playbookLog(hostPattern):
             logging.critical("playbookLog() - This query failed to execute: %s" % (query))
             logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
-        id = cur.execute("select MAX(id) from playbook_log").fetchone()
+        id = cur.execute("select MAX(id) from playbook_log").fetchone()[0]
         cur.close()
         con.commit()
         con.close()
@@ -112,14 +112,13 @@ def taskLog(task):
     id = -1
     try:
         query="INSERT INTO task_log (playbook_id, name, start) VALUES (?,?,getdate())"
-        cur.execute(query, playbookId[0], task.name)
+        cur.execute(query, playbookId, task.name)
     except mdb.Error as e:
         if logEnabled:
             logging.critical("taskLog() - This query failed to execute: %s" % (query))
-            logging.critical("taskLog() - playbookId was %s" % (playbookId))
             logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
-        id = cur.execute("select MAX(id) from task_log").fetchone()
+        id = cur.execute("select MAX(id) from task_log").fetchone()[0]
         cur.close()
         con.commit()
         con.close()
@@ -141,37 +140,41 @@ def insertOrUpdateHostName(hostName):
     # get ID of given host
     try:
         try:
-            cur.execute("SELECT id FROM hosts WHERE host=%s", (hostName))
+            query="SELECT id FROM hosts WHERE host=?"
+            cur.execute(query, hostName)
             rows = cur.rowcount
         except mdb.Error as e:
             if logEnabled:
-                logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (cur._last_executed))
-                logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
+                logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
             pass
 
         # check number of results - it might be a new host
         if rows > 0:
             try:
                 hostId = cur.fetchone()[0]
-                cur.execute("UPDATE hosts SET last_seen = getdate() WHERE id=%s", (hostId))
+                query="UPDATE hosts SET last_seen = getdate() WHERE id=?"
+                cur.execute(query, hostId)
             except mdb.Error as e:
                 if logEnabled:
                     logging.critical(
-                        "insertOrUpdateHostName() - This query failed to execute: %s" % (cur._last_executed))
-                    logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                        "insertOrUpdateHostName() - This query failed to execute: %s" % (query))
+                    logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
                 pass
         else:
             # add a new host to the table
             try:
-                cur.execute("INSERT INTO hosts (host, last_seen) VALUES (%s,getdate())", (hostName))
+                query="INSERT INTO hosts (host, last_seen) VALUES (?,getdate())"
+                cur.execute(query, hostName)
                 hostId = cur.lastrowid
             except mdb.Error as e:
                 if logEnabled:
                     logging.critical(
-                        "insertOrUpdateHostName() - This query failed to execute: %s" % (cur._last_executed))
-                    logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                        "insertOrUpdateHostName() - This query failed to execute: %s" % (query))
+                    logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
                 pass
     finally:
+        hostId = cur.execute("select MAX(id) from hosts").fetchone()[0]
         cur.close()
         con.commit()
         con.close()
