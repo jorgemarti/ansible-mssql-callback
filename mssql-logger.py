@@ -140,8 +140,9 @@ def insertOrUpdateHostName(hostName):
     # get ID of given host
     try:
         try:
-            query="SELECT id FROM hosts WHERE host=?"
+            query="SELECT count (id) FROM hosts WHERE host=?"
             cur.execute(query, hostName)
+	    rows = cur.fetchone()[0]
         except mdb.Error as e:
             if logEnabled:
                 logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
@@ -149,10 +150,11 @@ def insertOrUpdateHostName(hostName):
             pass
 
         # check number of results - it might be a new host
-        rows = cur.rowcount
         logging.critical("These are the rows gotten: %s" % (rows))
         if rows > 0:
             try:
+		query="SELECT id FROM hosts WHERE host=?"
+            	cur.execute(query, hostName)
                 hostId = cur.fetchone()[0]
                 query="UPDATE hosts SET last_seen = getdate() WHERE id=?"
                 cur.execute(query, hostId)
@@ -164,18 +166,17 @@ def insertOrUpdateHostName(hostName):
                 pass
         else:
             # add a new host to the table
+            logging.critical("Entering the creation of new host")
             try:
                 query="INSERT INTO hosts (host, last_seen) VALUES (?,getdate())"
                 cur.execute(query, hostName)
-                hostId = cur.lastrowid
             except mdb.Error as e:
                 if logEnabled:
-                    logging.critical(
-                        "insertOrUpdateHostName() - This query failed to execute: %s" % (query))
+                    logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
                     logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
                 pass
     finally:
-        hostId = cur.execute("select MAX(id) from hosts").fetchone()[0]
+        hostId = cur.execute("select id from hosts WHERE host=?",hostName).fetchone()[0]
         cur.close()
         con.commit()
         con.close()
