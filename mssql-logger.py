@@ -111,13 +111,14 @@ def taskLog(name):
     cur = con.cursor()
     id = -1
     try:
-        cur.execute("INSERT INTO task_log (playbook_id, name, start) VALUES (%s,%s,getdate())", (playbookId, name))
-        id = cur.lastrowid
+        query="INSERT INTO task_log (playbook_id, name, start) VALUES (?,?,getdate())"
+        cur.execute(query, (playbookId, name))
     except mdb.Error as e:
         if logEnabled:
-            logging.critical("taskLog() - This query failed to execute: %s" % (cur._last_executed))
-            logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+            logging.critical("taskLog() - This query failed to execute: %s" % (query))
+            logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
+        id = cur.execute("select MAX(id) from task_log").fetchone()
         cur.close()
         con.commit()
         con.close()
