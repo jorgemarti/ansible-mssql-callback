@@ -80,15 +80,17 @@ def playbookLog(hostPattern):
 #        cur.execute('''INSERT INTO playbook_log (host_pattern, running, start) VALUES (? ,'1',getdate())''', hostPattern)
 #        cur.execute(query)
         cur.execute(query, str(hostPattern))
-        id = cur.lastrowid
+        
     except mdb.Error as e:
         if logEnabled:
             logging.critical("playbookLog() - This query failed to execute: %s" % (query))
             logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
+        id = cur.execute("select MAX(id) * from playbook_log").fetchone()
         cur.close()
         con.commit()
         con.close()
+        logging.critical("The recorded playbook id is %s" % (id) )
     return id
 
 
