@@ -86,7 +86,7 @@ def playbookLog(hostPattern):
             logging.critical("playbookLog() - This query failed to execute: %s" % (query))
             logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
     finally:
-        id = cur.execute("select MAX(id) * from playbook_log").fetchone()
+        id = cur.execute("select MAX(id) from playbook_log").fetchone()
         cur.close()
         con.commit()
         con.close()
