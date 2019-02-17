@@ -430,7 +430,10 @@ class CallbackModule(object):
             okStatus = False
         runnerLog(host, res, okStatus)
         pass
-
+    def v2_runner_on_ok(self, result):
+        host = result._host.get_name()
+        self.runner_on_ok(host, result._result)
+        
     def runner_on_ok(self, host, res):
         if logEnabled:
             logging.debug("Callback: runner_on_ok(): host=%s" % (host))
