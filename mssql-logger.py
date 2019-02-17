@@ -143,7 +143,7 @@ def insertOrUpdateHostName(hostName):
             query="SELECT id FROM hosts WHERE host=?"
             cur.execute(query, hostName)
             con.commit()
-            rows = fetchone()[0]
+            rows = cur.fetchone()[0]
             logging.critical("These are the ids gotten: %s" % (rows))
         except mdb.Error as e:
             if logEnabled:
