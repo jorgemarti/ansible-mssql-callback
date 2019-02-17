@@ -93,7 +93,7 @@ def playbookFinished():
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
     cur = con.cursor()
     try:
-        query="UPDATE playbook_log SET end = getdate(), running='0' WHERE id = ?"
+        query="UPDATE playbook_log SET 'end' = getdate(), running='0' WHERE id = ?"
  #       cur.execute("UPDATE playbook_log SET end = getdate(), running='0' WHERE id = %s", (playbookId))
         cur.execute(query,playbookId)
     except mdb.Error as e:
