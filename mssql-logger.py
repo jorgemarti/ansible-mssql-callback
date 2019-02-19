@@ -190,27 +190,31 @@ def insertOrUpdateFactName(factName):
     # get ID of given fact
     try:
         try:
-            cur.execute("SELECT id FROM facts WHERE fact=%s", (factName))
-            rows = cur.rowcount
+            query="SELECT count(id) FROM facts WHERE fact=?"
+            cur.execute(query,factName)
+            rows = cur.fetchone()[0]
         except mdb.Error as e:
             if logEnabled:
-                logging.critical("insertOrUpdateFactName() - This query failed to execute: %s" % (cur._last_executed))
-                logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                logging.critical("insertOrUpdateFactName() - This query failed to execute: %s" % (query))
+                logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
             pass
 
         # check number of results - it might be a new fact
         if rows > 0:
+            query="SELECT id FROM facts WHERE fact=?"
+            cur.execute(query,factName)
             factId = cur.fetchone()[0]
         else:
             # add a new fact to the table
             try:
-                cur.execute("INSERT INTO facts (fact) VALUES (%s)", (factName))
-                factId = cur.lastrowid
+                query="INSERT INTO facts (fact) VALUES (?)"
+                cur.execute(query,factName)
+                factid = cur.execute("select MAX(id) from facts").fetchone()[0]
             except mdb.Error as e:
                 if logEnabled:
                     logging.critical(
-                        "insertOrUpdateFactName() - This query failed to execute: %s" % (cur._last_executed))
-                    logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                        "insertOrUpdateFactName() - This query failed to execute: %s" % (query))
+                    logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
                 pass
     finally:
         cur.close()
@@ -226,11 +230,12 @@ def storeFactData(hostId, factId, factData):
     try:
         # add new fact data to the table
         try:
-            cur.execute("INSERT INTO fact_data (fact_id, host_id, value) VALUES (%s,%s,%s)", (factId, hostId, factData))
+            query="INSERT INTO fact_data (fact_id, host_id, value) VALUES (?,?,?)"
+            cur.execute(query, (factId, hostId, factData))
         except mdb.Error as e:
             if logEnabled:
-                logging.critical("storeFactData() - This query failed to execute: %s" % (cur._last_executed))
-                logging.critical("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+                logging.critical("storeFactData() - This query failed to execute: %s" % (query))
+                logging.critical("MySQL Error [%s]: %s" % (e.args[0], e.args[1]))
             pass
     finally:
         cur.close()
