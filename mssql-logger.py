@@ -142,7 +142,7 @@ def insertOrUpdateHostName(hostName):
         try:
             query="SELECT count (id) FROM hosts WHERE host=?"
             cur.execute(query, hostName)
-	    rows = cur.fetchone()[0]
+            rows = cur.fetchone()[0]
         except mdb.Error as e:
             if logEnabled:
                 logging.critical("insertOrUpdateHostName() - This query failed to execute: %s" % (query))
@@ -150,11 +150,10 @@ def insertOrUpdateHostName(hostName):
             pass
 
         # check number of results - it might be a new host
-        logging.critical("These are the rows gotten: %s" % (rows))
         if rows > 0:
             try:
-		query="SELECT id FROM hosts WHERE host=?"
-            	cur.execute(query, hostName)
+                query="SELECT id FROM hosts WHERE host=?"
+                cur.execute(query, hostName)
                 hostId = cur.fetchone()[0]
                 query="UPDATE hosts SET last_seen = getdate() WHERE id=?"
                 cur.execute(query, hostId)
@@ -209,7 +208,7 @@ def insertOrUpdateFactName(factName):
             try:
                 query="INSERT INTO facts (fact) VALUES (?)"
                 cur.execute(query,factName)
-                factid = cur.execute("select MAX(id) from facts").fetchone()[0]
+                factId = cur.execute("select MAX(id) from facts").fetchone()[0]
             except mdb.Error as e:
                 if logEnabled:
                     logging.critical(
@@ -318,6 +317,7 @@ def storeRunnerLog(hostId, delegateHost, module, details, ok):
         pass
 
     # convert whatever remains to JSON (depending on the ansible module, there might be more or less extra information)
+    logging.critical("Trying to get facts: %s" % (details))
     extraInfo = json.dumps(details)
 
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
