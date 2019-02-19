@@ -405,6 +405,7 @@ def runnerLog(hostName, data, ok=True, unreachable=False, skipped=False):
         hostId = insertOrUpdateHostName(hostName)
         invocation = workData.pop('invocation', None)
         module = invocation.get('module_name', None)
+        logging.debug("Invoquing module %s" % (module))
         if module == 'setup':
             facts = workData.get('ansible_facts', None)
             clearFacts(hostId)
