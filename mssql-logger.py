@@ -317,7 +317,7 @@ def storeRunnerLog(hostId, delegateHost, module, details, ok):
         pass
 
     # convert whatever remains to JSON (depending on the ansible module, there might be more or less extra information)
-    logging.critical("Trying to get facts: %s" % (details))
+    #logging.critical("Trying to get facts: %s" % (details))
     extraInfo = json.dumps(details)
 
     con = mdb.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+mysqlHost+';DATABASE='+mysqlDb+';UID='+mysqlUser+';PWD='+ mysqlPassword)
@@ -405,7 +405,7 @@ def runnerLog(hostName, data, ok=True, unreachable=False, skipped=False):
         hostId = insertOrUpdateHostName(hostName)
         invocation = workData.pop('invocation', None)
         module = invocation.get('module_name', None)
-        logging.debug("Invoquing module %s" % (module))
+        logging.debug("Invoquing module %s from invocation %s" % (module, invocation))
         if module == 'setup':
             facts = workData.get('ansible_facts', None)
             clearFacts(hostId)
