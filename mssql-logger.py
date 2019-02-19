@@ -23,10 +23,10 @@ import ConfigParser
 import logging
 import time
 from ansible import constants as C
-from ansible import context
 from ansible.playbook.task_include import TaskInclude
 from ansible.plugins.callback import CallbackBase
 from ansible.utils.color import colorize, hostcolor
+
 
 
 # These values use ansible.constants for historical reasons, mostly to allow
@@ -453,8 +453,9 @@ class CallbackModule(CallbackBase):
     '''
 
     CALLBACK_VERSION = 2.0
-    CALLBACK_TYPE = 'stdout'
-    CALLBACK_NAME = 'default'
+    CALLBACK_TYPE = 'aggregate'
+    CALLBACK_NAME = 'ansible-logger'
+    CALLBACK_NEEDS_WHITELIST = False
 
     def __init__(self):
 
